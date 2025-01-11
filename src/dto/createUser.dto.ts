@@ -13,6 +13,15 @@ export class CreateUserDto {
   @IsString()
   regType: string;
 
+  @IsString()
+  role: string;
+
+  @IsString()
+  birthDate: string;
+
+  @IsString()
+  locale: string;
+
   @IsNotEmpty()
   @MinLength(6)
   password: string;

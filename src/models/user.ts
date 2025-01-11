@@ -15,7 +15,19 @@ export class User {
 
   @Column() password: string;
 
+  @Column({ type: 'text', nullable: true, default: null })
+  descr: string | null;
+
+  @Column({ type: 'text', nullable: true, default: null })
+  avatar: string | null;
+
+  @Column({ type: 'text', nullable: true, default: null })
+  smallAvatar: string | null;
+
   @Column({ default: '' }) emailVerificationToken: string;
+
+  @Column({ type: 'date', nullable: true })
+  birthDate: Date | null;
 
   @Column({ default: 'form' }) registrationType: string;
 
@@ -27,9 +39,9 @@ export class User {
 
   @Column({ default: false }) emailVerified: boolean;
 
-  @Column({ default: rolesEnum.USER }) role: string;
+  @Column({ default: rolesEnum.STUDENT }) role: string;
 
-  @OneToMany(() => Order, (order) => order.user)
+  @OneToMany(() => Order, (order: Order) => order.user)
   orders: Order[];
 
   @OneToMany(() => Transaction, (transaction: Transaction) => transaction.user)

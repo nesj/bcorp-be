@@ -120,8 +120,11 @@ export class AuthService {
       const createUserDto: CreateUserDto = {
         email: googleUser.email,
         name: googleUser.firstName,
+        birthDate: '',
+        role: null,
         surname: '',
         regType: 'Google',
+        locale: 'en',
         password: password,
         repeatPassword: password,
       };

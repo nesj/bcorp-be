@@ -57,8 +57,16 @@ export class UserService {
   }
 
   async register(createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, repeatPassword, name, surname, regType } =
-      createUserDto;
+    const {
+      email,
+      password,
+      repeatPassword,
+      name,
+      surname,
+      regType,
+      birthDate,
+      locale,
+    } = createUserDto;
 
     const existingUser = await this.userRepository.findOne({
       where: [{ email }],
@@ -81,17 +89,18 @@ export class UserService {
       surname,
       registrationType: regType,
       emailVerified: regType === 'Google' ? true : false,
+      birthDate,
     });
 
     await this.userRepository.save(newUser);
 
-    if (regType === 'Form') {
+    if (regType.toLowerCase() === 'form') {
       const emailToken = this.generateEmailJwt(newUser.id, newUser.email);
 
       newUser.emailVerificationToken = emailToken;
       // for future
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const verifyEmailUrl = `${process.env.FRONTEND_URL}/auth/verify-new-email?token=${newUser.emailVerificationToken}`;
+      const verifyEmailUrl = `${process.env.FRONTEND_URL}/${locale}/verify-new-email?token=${newUser.emailVerificationToken}`;
       console.log('verifyEmailUrl: ', verifyEmailUrl);
 
       await this.userRepository.save(newUser);
