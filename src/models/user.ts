@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { rolesEnum } from '../enums/rolesEnum';
 import { Order } from './order';
 import { Transaction } from './transaction';
+import { Lesson } from './lesson';
 
 @Entity('user')
 export class User {
@@ -39,11 +40,17 @@ export class User {
 
   @Column({ default: false }) emailVerified: boolean;
 
-  @Column({ default: rolesEnum.STUDENT }) role: string;
+  @Column({ default: rolesEnum.STUDENT }) role: rolesEnum;
 
   @OneToMany(() => Order, (order: Order) => order.user)
   orders: Order[];
 
   @OneToMany(() => Transaction, (transaction: Transaction) => transaction.user)
   transactions: Transaction[];
+
+  @OneToMany(() => Lesson, (lesson) => lesson.teacher)
+  teacherLessons: Lesson[];
+
+  @OneToMany(() => Lesson, (lesson) => lesson.student)
+  studentLessons: Lesson[];
 }

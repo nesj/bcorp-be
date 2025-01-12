@@ -8,13 +8,10 @@ import { AuthModule } from '../auth/auth.module';
 import { OrderModule } from 'src/order/order.module';
 import { SiquroModule } from '../siquro/siquro.module';
 import { join } from 'path';
+import { LessonModule } from 'src/lesson/lesson.module';
 
 @Module({
   imports: [
-    UserModule,
-    AuthModule,
-    OrderModule,
-    SiquroModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DATABASE_HOST || 'localhost',
@@ -26,10 +23,15 @@ import { join } from 'path';
         join(__dirname, '**', '*.entity.{ts,js}'),
         join(__dirname, 'models', '*.ts'),
       ],
-      autoLoadEntities: true,
+      autoLoadEntities: process.env.NODE_ENV === 'development' ? true : false,
       migrations: ['src/migrations/*.{ts}'],
       migrationsTableName: 'migrations',
     }),
+    UserModule,
+    AuthModule,
+    OrderModule,
+    SiquroModule,
+    LessonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
