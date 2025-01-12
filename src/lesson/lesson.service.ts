@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Lesson } from '../models/lesson';
 import { UserRequest } from '../types/extendedExpressRequest';
 import { Repository } from 'typeorm';
+import { GetAllWeeklyLessonsDto } from '../dto/getAllWeeklyLessons.dto';
 
 @Injectable()
 export class LessonService {
@@ -57,12 +58,80 @@ export class LessonService {
         endOfLessonWeek.setDate(startOfLessonWeek.getDate() + 6);
         endOfLessonWeek.setHours(23, 59, 59, 999);
 
-        const weekKey = `${startOfLessonWeek.toLocaleDateString()} - ${endOfLessonWeek.toLocaleDateString()}`;
+        const formatDate = (date: Date) => {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          return `${day}.${month}`;
+        };
+
+        const weekKey = `${formatDate(startOfLessonWeek)} - ${formatDate(endOfLessonWeek)}`;
 
         lessonsByWeek[weekKey] = (lessonsByWeek[weekKey] || 0) + 1;
       }
     });
 
     return lessonsByWeek;
+  }
+
+  async getLessons(req: UserRequest, dto: GetAllWeeklyLessonsDto) {
+    const { email, role } = req.user;
+    const filter =
+      role === 'teacher' ? { teacher: { email } } : { student: { email } };
+
+    const [startDateStr, endDateStr] = dto.date.split(' - ');
+    const [startDay, startMonth] = startDateStr.split('.');
+    const [endDay, endMonth] = endDateStr.split('.');
+
+    const startDate = new Date(
+      new Date().getFullYear(),
+      parseInt(startMonth) - 1,
+      parseInt(startDay),
+    );
+    const endDate = new Date(
+      new Date().getFullYear(),
+      parseInt(endMonth) - 1,
+      parseInt(endDay),
+    );
+
+    const lessons = await this.lessonRepository.find({
+      where: filter,
+      relations: ['teacher', 'student'],
+    });
+
+    if (!lessons.length) {
+      return {};
+    }
+
+    const lessonsInRange = lessons.filter((lesson) => {
+      const lessonDate = new Date(
+        new Date(lesson.startDate).setHours(0, 0, 0, 0),
+      ).getTime();
+      const start = new Date(
+        new Date(startDate).setHours(0, 0, 0, 0),
+      ).getTime();
+      const end = new Date(new Date(endDate).setHours(0, 0, 0, 0)).getTime();
+
+      return lessonDate >= start && lessonDate <= end;
+    });
+
+    const lessonsByDay: Record<string, Record<string, any>> = {};
+
+    lessonsInRange.forEach((lesson) => {
+      const lessonDate = new Date(lesson.startDate);
+      const dayKey = `day-${lessonDate.getDay() + 1}`;
+      const timeKey = `${lessonDate.getHours()}:${String(lessonDate.getMinutes()).padStart(2, '0')}`;
+
+      if (!lessonsByDay[dayKey]) {
+        lessonsByDay[dayKey] = {};
+      }
+
+      lessonsByDay[dayKey][timeKey] = {
+        Subject: lesson.subject,
+        Teacher: lesson.teacher.email,
+        Student: lesson.student.email,
+      };
+    });
+
+    return lessonsByDay;
   }
 }
