@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../models/user';
 import { CreateUserDto } from '../dto/createUser.dto';
@@ -66,6 +66,7 @@ export class UserService {
       regType,
       birthDate,
       locale,
+      role,
     } = createUserDto;
 
     const existingUser = await this.userRepository.findOne({
@@ -87,6 +88,7 @@ export class UserService {
       password: hashedPassword,
       name,
       surname,
+      role,
       registrationType: regType,
       emailVerified: regType === 'Google' ? true : false,
       birthDate,
@@ -147,6 +149,7 @@ export class UserService {
         'surname',
         'tokens',
         'emailVerified',
+        'subjects',
       ],
     });
 
@@ -169,7 +172,7 @@ export class UserService {
     return existingUser;
   }
 
-  async saveUser(user: User): Promise<boolean> {
+  async saveUser(user: DeepPartial<User>): Promise<boolean> {
     const existingUser = await this.userRepository.findOne({
       where: { id: user.id },
     });

@@ -5,10 +5,11 @@ import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthModule } from '../auth/auth.module';
-import { OrderModule } from 'src/order/order.module';
+import { OrderModule } from '../order/order.module';
 import { SiquroModule } from '../siquro/siquro.module';
 import { join } from 'path';
-import { LessonModule } from 'src/lesson/lesson.module';
+import { LessonModule } from '../lesson/lesson.module';
+import { TeacherModule } from '../teacher/teacher.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LessonModule } from 'src/lesson/lesson.module';
     OrderModule,
     SiquroModule,
     LessonModule,
+    TeacherModule,
   ],
   controllers: [AppController],
   providers: [AppService],

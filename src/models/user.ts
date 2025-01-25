@@ -36,6 +36,8 @@ export class User {
 
   @Column({ default: null }) surname: string;
 
+  @Column({ default: null }) subjects?: string; //subjects only for teachers
+
   @Column({ default: 0 }) tokens: number;
 
   @Column({ default: false }) emailVerified: boolean;
