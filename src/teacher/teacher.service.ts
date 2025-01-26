@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateNewSubjectDto } from '../dto/createNewSubject.dto';
 import { UserRequest } from '../types/extendedExpressRequest';
 import { UserService } from '../user/user.service';
+import { LessonService } from '../lesson/lesson.service';
 
 @Injectable()
 export class TeacherService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly lessonService: LessonService,
+  ) {}
 
   async createNewSubject(
     createSubjectDTO: CreateNewSubjectDto,
@@ -52,5 +56,11 @@ export class TeacherService {
     await this.userService.saveUser(existingUser);
 
     return { success: true };
+  }
+
+  async deactivateLesson(lessonId: string): Promise<{ success: boolean }> {
+    if (await this.lessonService.cancelLesson(lessonId)) {
+      return { success: true };
+    }
   }
 }

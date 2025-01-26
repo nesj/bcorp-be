@@ -14,6 +14,8 @@ import { UserService } from './user.service';
 import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { ChangeProfileDto } from '../dto/changeProfile.dto';
 import { UserRequest } from '../types/extendedExpressRequest';
+import { UpdateProfileDto } from '../dto/updateProfile.dto';
+import { GetProfileInfoDto } from '../dto/getProfileInfo.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -60,6 +62,31 @@ export class UserController {
       return await this.userService.changeProfile(changeProfileDto, req);
     } catch (error) {
       this.logger.error('change-profile error: ', error.message);
+
+      throw new HttpException(error.message, error.status || 500);
+    }
+  }
+
+  @Post('update-profile')
+  async updateProfile(
+    @Body() updateProfileDto: UpdateProfileDto,
+    @Request() req: UserRequest,
+  ) {
+    try {
+      return await this.userService.updateProfile(updateProfileDto, req);
+    } catch (error) {
+      this.logger.error('update-profile error: ', error.message);
+
+      throw new HttpException(error.message, error.status || 500);
+    }
+  }
+
+  @Post('get-profile-info')
+  async getProfileInfo(@Body() getProfileInfoDto: GetProfileInfoDto) {
+    try {
+      return await this.userService.getProfileInfo(getProfileInfoDto);
+    } catch (error) {
+      this.logger.error('update-profile error: ', error.message);
 
       throw new HttpException(error.message, error.status || 500);
     }

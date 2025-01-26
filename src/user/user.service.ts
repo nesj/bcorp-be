@@ -14,6 +14,8 @@ import { UserRequest } from '../types/extendedExpressRequest';
 import { ChangeProfileDto } from '../dto/changeProfile.dto';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordRecoveryDTO } from '../dto/passwordRecovery.dto';
+import { UpdateProfileDto } from '../dto/updateProfile.dto';
+import { GetProfileInfoDto } from '../dto/getProfileInfo.dto';
 
 @Injectable()
 export class UserService {
@@ -279,6 +281,59 @@ export class UserService {
     const token = this.generateJwt(existingUser);
 
     return { success: true, newEmail: emailChanged, token: token };
+  }
+
+  async updateProfile(
+    updateProfileDto: UpdateProfileDto,
+    req: UserRequest,
+  ): Promise<{ success: boolean }> {
+    const { fields, values } = updateProfileDto;
+
+    if (fields.length !== values.length) {
+      throw new BadRequestException('Fields and values length mismatch.');
+    }
+
+    const existingUser = await this.userRepository.findOne({
+      where: [{ email: req.user.email }],
+    });
+
+    fields.forEach((field, index) => {
+      const key = field as keyof typeof existingUser;
+
+      if (key in existingUser) {
+        if (
+          typeof existingUser[key] === typeof values[index] ||
+          existingUser[key] === null
+        ) {
+          existingUser[key] = values[index] as never;
+        } else {
+          throw new BadRequestException(
+            `Invalid type for field '${field}'. Expected '${typeof existingUser[key]}'.`,
+          );
+        }
+      } else {
+        throw new BadRequestException(
+          `Field '${field}' does not exist on user entity.`,
+        );
+      }
+    });
+
+    await this.saveUser(existingUser);
+
+    return { success: true };
+  }
+
+  async getProfileInfo(
+    getProfileInfoDTO: GetProfileInfoDto,
+  ): Promise<Partial<User>> {
+    const { select, email, id } = getProfileInfoDTO;
+
+    const user = await this.userRepository.findOne({
+      where: email ? { email } : id ? { id } : undefined,
+      select: select,
+    });
+
+    return user;
   }
 
   generateEmailJwt(userId: number, newEmail: string): string {

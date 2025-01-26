@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Lesson } from '../models/lesson';
 import { UserRequest } from '../types/extendedExpressRequest';
 import { Repository } from 'typeorm';
 import { GetAllWeeklyLessonsDto } from '../dto/getAllWeeklyLessons.dto';
+import { LessonStatuses } from '../enums/lessonStatusEnum';
 
 @Injectable()
 export class LessonService {
@@ -19,7 +20,7 @@ export class LessonService {
       role === 'teacher' ? { teacher: { email } } : { student: { email } };
 
     const lessons = await this.lessonRepository.find({
-      where: filter,
+      where: { ...filter, status: LessonStatuses.Opened },
       relations: ['teacher', 'student'],
     });
 
@@ -94,7 +95,7 @@ export class LessonService {
     );
 
     const lessons = await this.lessonRepository.find({
-      where: filter,
+      where: { ...filter, status: LessonStatuses.Opened },
       relations: ['teacher', 'student'],
     });
 
@@ -126,6 +127,7 @@ export class LessonService {
       }
 
       lessonsByDay[dayKey][timeKey] = {
+        id: lesson.id,
         Subject: lesson.subject,
         Teacher: lesson.teacher.email,
         Student: lesson.student.email,
@@ -133,5 +135,21 @@ export class LessonService {
     });
 
     return lessonsByDay;
+  }
+
+  async cancelLesson(id: string): Promise<boolean> {
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: Number(id) },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found');
+    }
+
+    lesson.status = LessonStatuses.Cancelled;
+
+    await this.lessonRepository.save(lesson);
+
+    return true;
   }
 }

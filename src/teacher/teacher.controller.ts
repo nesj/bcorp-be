@@ -10,6 +10,7 @@ import {
   Request,
   Delete,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { TeacherService } from './teacher.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
@@ -57,7 +58,17 @@ export class TeacherController {
     try {
       return await this.teacherService.deleteSubject(req, subject);
     } catch (error) {
-      this.logger.error('get subjects error: ', error.message);
+      this.logger.error('delete subject error: ', error.message);
+      throw new HttpException(error.message, error.status || 500);
+    }
+  }
+
+  @Patch('/cancel-lesson/:lessonId')
+  async cancelLesson(@Param('lessonId') lessonId: string) {
+    try {
+      return await this.teacherService.deactivateLesson(lessonId);
+    } catch (error) {
+      this.logger.error('delete lesson error: ', error.message);
       throw new HttpException(error.message, error.status || 500);
     }
   }
