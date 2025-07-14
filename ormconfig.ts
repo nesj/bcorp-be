@@ -8,7 +8,7 @@ export const connectionSource = new DataSource({
   url: process.env.DATABASE_PUBLIC_URL,
   logging: ['error', 'warn'],
   synchronize: false,
-  migrations: ['src/migrations/*.ts'],
+  migrations: ['src/migrations/*.ts', 'dist/migrations/*.js'],
   migrationsTableName: 'migrations',
   entities: ['src/models/*.ts', 'src/**/*.entity.ts'],
   extra: {

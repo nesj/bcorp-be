@@ -21,7 +21,7 @@ import { TeacherModule } from '../teacher/teacher.module';
         join(__dirname, 'models', '*.ts'),
       ],
       synchronize: false,
-      migrations: ['src/migrations/*.ts'],
+      migrations: ['src/migrations/*.ts', 'dist/migrations/*.js'],
       migrationsTableName: 'migrations',
       extra: {
         ssl: process.env.NODE_ENV === 'production' ? { 
