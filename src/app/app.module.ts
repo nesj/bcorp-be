@@ -15,11 +15,9 @@ import { TeacherModule } from '../teacher/teacher.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: Number.parseInt(process.env.DATABASE_PORT) || 3306,
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE,
+      url:
+        process.env.DATABASE_PUBLIC_URL ||
+        `mysql://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST || 'localhost'}:${Number.parseInt(process.env.DATABASE_PORT) || 3306}/${process.env.DATABASE}`,
       entities: [
         join(__dirname, '**', '*.entity.{ts,js}'),
         join(__dirname, 'models', '*.ts'),
