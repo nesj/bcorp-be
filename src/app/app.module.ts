@@ -15,16 +15,19 @@ import { TeacherModule } from '../teacher/teacher.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      url:
-        process.env.DATABASE_PUBLIC_URL ||
-        `mysql://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST || 'localhost'}:${Number.parseInt(process.env.DATABASE_PORT) || 3306}/${process.env.DATABASE}`,
+      url: process.env.MYSQL_URL || process.env.DATABASE_PUBLIC_URL,
       entities: [
         join(__dirname, '**', '*.entity.{ts,js}'),
         join(__dirname, 'models', '*.ts'),
       ],
-      autoLoadEntities: process.env.NODE_ENV === 'development' ? true : false,
-      migrations: ['src/migrations/*.{ts}'],
+      synchronize: false,
+      migrations: ['src/migrations/*.ts'],
       migrationsTableName: 'migrations',
+      extra: {
+        ssl: process.env.NODE_ENV === 'production' ? { 
+          rejectUnauthorized: false 
+        } : false
+      }
     }),
     UserModule,
     AuthModule,
