@@ -162,7 +162,8 @@ export class UserService {
     return existingUser;
   }
 
-  async findById(id: number): Promise<User> {
+  async findById(id: number, req?: UserRequest): Promise<User> {
+
     const existingUser = await this.userRepository.findOne({
       where: [{ id }],
     });

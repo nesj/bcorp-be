@@ -8,6 +8,7 @@ import {
   Logger,
   Body,
   HttpException,
+  Param,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { UserService } from './user.service';
@@ -36,6 +37,19 @@ export class UserController {
     } catch (error) {
       this.logger.error('get profile error: ', error.message);
       throw new InternalServerErrorException('get profile failed');
+    }
+  }
+
+  // get user by id
+  @Get(':id')
+  async getUserById(@Request() req: UserRequest, @Param('id') id: string) {
+    try {
+      const userId = Number(id);
+      
+      return await this.userService.findById(userId, req);
+    } catch (error) {
+      this.logger.error('get-user-by-id error: ', error.message);
+      throw new HttpException(error.message, error.status || 500);
     }
   }
 
