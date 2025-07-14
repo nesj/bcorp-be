@@ -5,7 +5,7 @@ dotenv.config();
 
 export const connectionSource = new DataSource({
   type: 'mysql',
-  url: process.env.MYSQL_URL || process.env.DATABASE_PUBLIC_URL,
+  url: process.env.DATABASE_PUBLIC_URL,
   logging: ['error', 'warn'],
   synchronize: false,
   migrations: ['src/migrations/*.ts'],

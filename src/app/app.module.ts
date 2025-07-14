@@ -15,7 +15,7 @@ import { TeacherModule } from '../teacher/teacher.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      url: process.env.MYSQL_URL || process.env.DATABASE_PUBLIC_URL,
+      url: process.env.DATABASE_PUBLIC_URL,
       entities: [
         join(__dirname, '**', '*.entity.{ts,js}'),
         join(__dirname, 'models', '*.ts'),
