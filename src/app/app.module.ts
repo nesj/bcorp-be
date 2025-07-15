@@ -10,16 +10,18 @@ import { SiquroModule } from '../siquro/siquro.module';
 import { join } from 'path';
 import { LessonModule } from '../lesson/lesson.module';
 import { TeacherModule } from '../teacher/teacher.module';
+import { User } from '../models/user';
+import { Lesson } from '../models/lesson';
+import { Order } from '../models/order';
+import { SiquroWebhook } from 'src/models/siquroWebhook';
+import { Transaction } from 'src/models/transaction';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
       url: process.env.DATABASE_PUBLIC_URL,
-      entities: [
-        join(__dirname, '**', '*.entity.{ts,js}'),
-        join(__dirname, 'models', '*.ts'),
-      ],
+      entities: [User, Lesson, Order, Transaction, SiquroWebhook],
       synchronize: false,
       migrations: ['dist/migrations/*.js'],
       migrationsTableName: 'migrations',

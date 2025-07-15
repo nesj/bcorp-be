@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BadRequestException, HttpException } from '@nestjs/common';
+import { rolesEnum } from 'src/enums/rolesEnum';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -41,9 +42,7 @@ describe('AuthController', () => {
         .spyOn(authService, 'createRecoveryToken')
         .mockResolvedValue({ success: true });
 
-      const result = await controller.createRecoveryToken(
-        createRecoveryTokenDto,
-      );
+      const result = await controller.createRecoveryToken(createRecoveryTokenDto);
       expect(result).toEqual({ success: true });
     });
 
@@ -61,68 +60,53 @@ describe('AuthController', () => {
 
   describe('passwordRecovery', () => {
     it('should call authService.recoverPassword and return success', async () => {
-      const passwordRecoveryDto = {
+      const dto = {
         newPassword: 'newpassword',
         repeatNewPassword: 'newpassword',
         token: 'validToken',
       };
-      jest
-        .spyOn(authService, 'recoverPassword')
-        .mockResolvedValue({ success: true, token: 'newValidToken' });
+      jest.spyOn(authService, 'recoverPassword').mockResolvedValue({ success: true, token: 'newValidToken' });
 
-      const result = await controller.passwordRecovery(passwordRecoveryDto);
+      const result = await controller.passwordRecovery(dto);
       expect(result).toEqual({ success: true, token: 'newValidToken' });
     });
 
     it('should throw HttpException if recoverPassword fails', async () => {
-      const passwordRecoveryDto = {
+      const dto = {
         newPassword: 'newpassword',
         repeatNewPassword: 'newpassword',
         token: 'invalidToken',
       };
-      jest
-        .spyOn(authService, 'recoverPassword')
-        .mockRejectedValue(new HttpException('Recovery failed', 500));
+      jest.spyOn(authService, 'recoverPassword').mockRejectedValue(new HttpException('Recovery failed', 500));
 
-      await expect(
-        controller.passwordRecovery(passwordRecoveryDto),
-      ).rejects.toThrow(HttpException);
+      await expect(controller.passwordRecovery(dto)).rejects.toThrow(HttpException);
     });
   });
 
   describe('verifyPasswordRecovery', () => {
     it('should call authService.passwordRecoveryVerify and return success', async () => {
-      const token = 'validToken';
-      jest
-        .spyOn(authService, 'passwordRecoveryVerify')
-        .mockResolvedValue({ success: true });
+      jest.spyOn(authService, 'passwordRecoveryVerify').mockResolvedValue({ success: true });
 
-      const result = await controller.verifyPasswordRecovery(token);
+      const result = await controller.verifyPasswordRecovery('validToken');
       expect(result).toEqual({ success: true });
     });
 
     it('should throw HttpException if token is invalid', async () => {
-      const token = 'invalidToken';
-      jest
-        .spyOn(authService, 'passwordRecoveryVerify')
-        .mockRejectedValue(new HttpException('Invalid token', 400));
+      jest.spyOn(authService, 'passwordRecoveryVerify').mockRejectedValue(new HttpException('Invalid token', 400));
 
-      await expect(controller.verifyPasswordRecovery(token)).rejects.toThrow(
-        HttpException,
-      );
+      await expect(controller.verifyPasswordRecovery('invalidToken')).rejects.toThrow(HttpException);
     });
   });
 
   describe('verifyNewEmail', () => {
     it('should call authService.verifyNewEmail and return success', async () => {
-      const token = 'validToken';
       jest.spyOn(authService, 'verifyNewEmail').mockResolvedValue({
         success: true,
         token: 'newValidToken',
         newEmail: 'new@example.com',
       });
 
-      const result = await controller.veryfyNewEmail(token);
+      const result = await controller.veryfyNewEmail('validToken');
       expect(result).toEqual({
         success: true,
         token: 'newValidToken',
@@ -131,14 +115,9 @@ describe('AuthController', () => {
     });
 
     it('should throw HttpException if token verification fails', async () => {
-      const token = 'invalidToken';
-      jest
-        .spyOn(authService, 'verifyNewEmail')
-        .mockRejectedValue(new HttpException('Invalid token', 400));
+      jest.spyOn(authService, 'verifyNewEmail').mockRejectedValue(new HttpException('Invalid token', 400));
 
-      await expect(controller.veryfyNewEmail(token)).rejects.toThrow(
-        HttpException,
-      );
+      await expect(controller.veryfyNewEmail('invalidToken')).rejects.toThrow(HttpException);
     });
   });
 
@@ -151,6 +130,9 @@ describe('AuthController', () => {
         regType: 'form',
         password: 'password123',
         repeatPassword: 'password123',
+        role: rolesEnum.STUDENT,
+        birthDate: '2000-01-01',
+        locale: 'en',
       };
 
       jest.spyOn(authService, 'register').mockResolvedValue({
@@ -164,15 +146,20 @@ describe('AuthController', () => {
           registrationType: 'form',
           tokens: 0,
           emailVerified: false,
-          role: '',
+          role: rolesEnum.STUDENT,
           orders: [],
           transactions: [],
+          descr: null,
+          avatar: null,
+          smallAvatar: null,
+          birthDate: null,
+          teacherLessons: [],
+          studentLessons: [],
         },
-        token: 'validToken',
+        token: 'mock-token',
       });
 
       const result = await controller.register(createUserDto);
-
       expect(result).toEqual({
         user: {
           id: 1,
@@ -184,11 +171,17 @@ describe('AuthController', () => {
           registrationType: 'form',
           tokens: 0,
           emailVerified: false,
-          role: '',
+          role: rolesEnum.STUDENT,
           orders: [],
           transactions: [],
+          descr: null,
+          avatar: null,
+          smallAvatar: null,
+          birthDate: null,
+          teacherLessons: [],
+          studentLessons: [],
         },
-        token: 'validToken',
+        token: 'mock-token',
       });
     });
 
@@ -200,14 +193,13 @@ describe('AuthController', () => {
         regType: 'form',
         password: 'password123',
         repeatPassword: 'password123',
+        role: rolesEnum.STUDENT,
+        birthDate: '2000-01-01',
+        locale: 'en',
       };
-      jest
-        .spyOn(authService, 'register')
-        .mockRejectedValue(new HttpException('Registration failed', 500));
+      jest.spyOn(authService, 'register').mockRejectedValue(new HttpException('Registration failed', 500));
 
-      await expect(controller.register(createUserDto)).rejects.toThrow(
-        HttpException,
-      );
+      await expect(controller.register(createUserDto)).rejects.toThrow(HttpException);
     });
   });
 
@@ -229,15 +221,20 @@ describe('AuthController', () => {
           registrationType: 'form',
           tokens: 0,
           emailVerified: false,
-          role: '',
+          role: rolesEnum.STUDENT,
           orders: [],
           transactions: [],
+          descr: null,
+          avatar: null,
+          smallAvatar: null,
+          birthDate: null,
+          teacherLessons: [],
+          studentLessons: [],
         },
         token: 'validToken',
       });
 
       const result = await controller.login(loginUserDto);
-
       expect(result).toEqual({
         user: {
           id: 1,
@@ -249,9 +246,15 @@ describe('AuthController', () => {
           registrationType: 'form',
           tokens: 0,
           emailVerified: false,
-          role: '',
+          role: rolesEnum.STUDENT,
           orders: [],
           transactions: [],
+          descr: null,
+          avatar: null,
+          smallAvatar: null,
+          birthDate: null,
+          teacherLessons: [],
+          studentLessons: [],
         },
         token: 'validToken',
       });
@@ -262,13 +265,9 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'wrongpassword',
       };
-      jest
-        .spyOn(authService, 'login')
-        .mockRejectedValue(new HttpException('Login failed', 401));
+      jest.spyOn(authService, 'login').mockRejectedValue(new HttpException('Login failed', 401));
 
-      await expect(controller.login(loginUserDto)).rejects.toThrow(
-        HttpException,
-      );
+      await expect(controller.login(loginUserDto)).rejects.toThrow(HttpException);
     });
   });
 
@@ -276,14 +275,9 @@ describe('AuthController', () => {
     it('should redirect to frontend with token', async () => {
       const googleUser = { email: 'test@example.com', firstName: 'John' };
       const response = { redirect: jest.fn() };
-      jest
-        .spyOn(authService, 'callbackFromGoogle')
-        .mockResolvedValue({ token: 'validToken' });
+      jest.spyOn(authService, 'callbackFromGoogle').mockResolvedValue({ token: 'validToken' });
 
-      await controller.googleAuthRedirect(
-        { user: googleUser },
-        response as any,
-      );
+      await controller.googleAuthRedirect({ user: googleUser }, response as any);
 
       expect(response.redirect).toHaveBeenCalledWith(
         `${process.env.FRONTEND_URL}/auth/callback?token=validToken`,
@@ -293,9 +287,7 @@ describe('AuthController', () => {
     it('should throw HttpException if google callback fails', async () => {
       const googleUser = { email: 'test@example.com', firstName: 'John' };
       const response = { redirect: jest.fn() };
-      jest
-        .spyOn(authService, 'callbackFromGoogle')
-        .mockRejectedValue(new HttpException('Google login failed', 500));
+      jest.spyOn(authService, 'callbackFromGoogle').mockRejectedValue(new HttpException('Google login failed', 500));
 
       await expect(
         controller.googleAuthRedirect({ user: googleUser }, response as any),

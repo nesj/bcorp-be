@@ -7,6 +7,7 @@ import { CreateUserDto } from '../dto/createUser.dto';
 import { LoginUserDto } from '../dto/loginUser.dto';
 import { GoogleUser } from '../types/googleUserInterface';
 import { User } from '../models/user';
+import { rolesEnum } from 'src/enums/rolesEnum';
 jest.mock('../user/user.service');
 jest.mock('generate-password');
 jest.mock('@nestjs/jwt');
@@ -122,6 +123,9 @@ describe('AuthService', () => {
         regType: 'form',
         password: 'password123',
         repeatPassword: 'password123',
+        role: rolesEnum.STUDENT,
+        birthDate: '2000-01-01',
+        locale: 'en',
       };
 
       const newUser = {
@@ -170,10 +174,17 @@ describe('AuthService', () => {
         registrationType: 'form',
         tokens: 0,
         emailVerified: false,
-        role: '',
+        role: rolesEnum.STUDENT,
+        birthDate: new Date('2000-01-01'),
+        descr: null,
+        avatar: null,
+        smallAvatar: null,
         orders: [],
         transactions: [],
+        teacherLessons: [],
+        studentLessons: []
       };
+      
 
       mockUserService.login = jest.fn().mockResolvedValue(loginUserDto);
       mockJwtService.sign = jest.fn().mockReturnValue('jwt-token');
