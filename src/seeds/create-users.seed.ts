@@ -12,6 +12,25 @@ async function seed() {
     const teacherExists = await userRepo.findOneBy({ email: 'teacher@example.com' });
     const studentExists = await userRepo.findOneBy({ email: 'student@example.com' });
 
+    if (!studentExists) {
+      const hashedPasswordStudent = await bcrypt.hash('student123', 10);
+      const student = userRepo.create({
+        email: 'student@example.com',
+        password: hashedPasswordStudent,
+        name: 'Jane',
+        surname: 'Smith',
+        role: rolesEnum.STUDENT,
+        emailVerified: true,
+        registrationType: 'form',
+        tokens: 0,
+      });
+      await userRepo.save(student);
+      console.log('✅ Student user created');
+    } else {
+      console.log('ℹ️ Student user already exists');
+    }
+
+    
     if (!teacherExists) {
       const hashedPasswordTeacher = await bcrypt.hash('teacher123', 10);
       const teacher = userRepo.create({
@@ -30,23 +49,6 @@ async function seed() {
       console.log('ℹ️ Teacher user already exists');
     }
 
-    if (!studentExists) {
-      const hashedPasswordStudent = await bcrypt.hash('student123', 10);
-      const student = userRepo.create({
-        email: 'student@example.com',
-        password: hashedPasswordStudent,
-        name: 'Jane',
-        surname: 'Smith',
-        role: rolesEnum.STUDENT,
-        emailVerified: true,
-        registrationType: 'form',
-        tokens: 0,
-      });
-      await userRepo.save(student);
-      console.log('✅ Student user created');
-    } else {
-      console.log('ℹ️ Student user already exists');
-    }
 
     await connectionSource.destroy();
     console.log('✅ Seeding complete');
